@@ -4,8 +4,8 @@ import argparse
 #import imutils
 import cv2
 
-img = cv2.imread("markers.png")
-mark = cv2.imread("marker_0.png")
+img = cv2.imread("../images/markers.png")
+mark = cv2.imread("../images/marker_0.png")
 (h, w) = mark.shape[:2]
 
 result = cv2.matchTemplate(img, mark, cv2.TM_CCOEFF)
