@@ -6,7 +6,7 @@
 #include <iostream>
 #include <mavros/OverrideRCIn.h>
 
-#define FACTOR 0.5
+#define FACTOR 0.6
 
 image_transport::Subscriber sub;
 ros::Publisher pub;
@@ -45,7 +45,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         // For each marker, draw info ant its coundaries in the image
         for (unsigned int i = 0; i<Markers.size(); i++){
-            cout<<Markers[i]<<endl;
+            //cout<<Markers[i]<<endl;
             Markers[i].draw(InImage,cv::Scalar(0,0,255),2);
 
             // Calculate the error between Image center and Mark center
