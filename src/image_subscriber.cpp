@@ -32,7 +32,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Error between Image and Mark
         float ErX = 0.0;
         float ErY = 0.0;
-        
+
         // Get the Image center
         ImageX = InImage.cols / 2.0f;
         ImageY = InImage.rows / 2.0f;
@@ -56,10 +56,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             ErY = ImageY - MarkY;
         }
 
-        msg.channels[0] = 1500 - ErX * FACTOR;
-        msg.channels[1] = 1500 - ErY * FACTOR;
-        msg.channels[2] = 1500;
-        msg.channels[3] = 0;
+        msg.channels[0] = 1500 - ErX * FACTOR;  //Roll
+        msg.channels[1] = 1500 - ErY * FACTOR;  //Pitch
+        msg.channels[2] = 1500;                 //Yaw
+        msg.channels[3] = 0;                    //Throttle
         msg.channels[4] = 0;
         msg.channels[5] = 0;
         msg.channels[6] = 0;
