@@ -32,6 +32,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Error between Image and Mark
         float ErX = 0.0;
         float ErY = 0.0;
+        
         // Get the Image center
         ImageX = InImage.cols / 2.0f;
         ImageY = InImage.rows / 2.0f;
@@ -45,7 +46,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         // For each marker, draw info ant its coundaries in the image
         for (unsigned int i = 0; i<Markers.size(); i++){
-            //cout<<Markers[i]<<endl;
             Markers[i].draw(InImage,cv::Scalar(0,0,255),2);
 
             // Calculate the error between Image center and Mark center
@@ -79,12 +79,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "image_listener");
-    // cv::namedWindow("view");
-    // cv::startWindowThread();
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
     pub = nh.advertise< mavros::OverrideRCIn >("/mavros/rc/override", 10);;
     ros::spin();
-    //cv::destroyWindow("view");
 }
