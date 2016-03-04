@@ -95,4 +95,8 @@ res.png
 
 # Project
 *.pro
-*.user
+*.pro.user
+
+images/
+scripts/
+build/
