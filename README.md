@@ -2,6 +2,7 @@
 A ROS package to control a copter so that it follows ArUco patterns with the bottom camera.
 
 Quick setup:
+Modify `src/image_subscriber.cpp` with desired values (follow TO DO comments) and then run
 ```bash
 # Within a catkin directory
 cd src
