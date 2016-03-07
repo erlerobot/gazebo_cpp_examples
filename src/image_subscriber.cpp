@@ -6,74 +6,75 @@
 #include <iostream>
 #include <mavros/OverrideRCIn.h>
 
-#define FACTOR 0.6
+/*
+    TO DO : Choose a FACTOR of your choice. Note that:
+            * Increasing this value will make the drone move faster, but imprecisely.
+            * Decreasing the value will make the drone move more precisely, but slower.
+*/
+#define FACTOR // TO DO
+
+
+/*
+    TO DO : Choose the correct base values for roll, pitch and yaw
+*/
+#define BASE_ROLL_VALUE // TO DO
+#define BASE_PITCH_VALUE //TO DO
+#define BASE_YAW_VALUE // TO DO
 
 image_transport::Subscriber sub;
 ros::Publisher pub;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-    try
-    {
-        aruco::MarkerDetector MDetector;
-        vector<aruco::Marker> Markers;
-        cv::Point2f MarkCenter;
+    aruco::MarkerDetector MDetector;
+    vector<aruco::Marker> Markers;
+    cv::Point2f MarkCenter;
 
-        // Get the msg image
-        cv::Mat InImage;
-        InImage = cv_bridge::toCvShare(msg, "bgr8")->image;
+    /*
+        TO DO : Extract the image from the message (msg) and store it in InImage
+    */
+    cv::Mat InImage /* = image_from_the_msg */;
 
-        //Mark center
-        float MarkX, MarkY;
+    // Detect the markers in InImage and store them in Markers
+    MDetector.detect(InImage,Markers);
 
-        //Image center
-        float ImageX, ImageY;
+    // Create RC msg
+    mavros::OverrideRCIn msg;
 
-        // Error between Image and Mark
-        float ErX = 0.0;
-        float ErY = 0.0;
+    // For each marker, draw info ant its coundaries in the image
+    for (unsigned int i = 0; i<Markers.size(); i++){
+        Markers[i].draw(InImage,cv::Scalar(0,0,255),2);
 
-        // Get the Image center
-        ImageX = InImage.cols / 2.0f;
-        ImageY = InImage.rows / 2.0f;
+        /*
+            TO DO : Calculate the error between the center of the image and the center of the mark
 
-        // Detect
-        MDetector.detect(InImage,Markers);
+            ERROR_X_AXIS = IMAGE_CENTER_X_AXIS - MARK_CENTER_X_AXIS
+            ERROR_Y_AXIS = IMAGE_CENTER_Y_AXIS - MARK_CENTER_Y_AXIS
 
-        // Create RC msg
-        mavros::OverrideRCIn msg;
+        */
+    }
 
+    /*  
+        TO DO : For each RC channel aply the desired values so that the center of the camera matches with the center of the mark.
 
-        // For each marker, draw info ant its coundaries in the image
-        for (unsigned int i = 0; i<Markers.size(); i++){
-            Markers[i].draw(InImage,cv::Scalar(0,0,255),2);
-
-            // Calculate the error between Image center and Mark center
-            MarkCenter = Markers[i].getCenter();
-            MarkX = MarkCenter.x;
-            MarkY = MarkCenter.y;
-            ErX = ImageX - MarkX;
-            ErY = ImageY - MarkY;
-        }
-
-        msg.channels[0] = 1500 - ErX * FACTOR;  //Roll
-        msg.channels[1] = 1500 - ErY * FACTOR;  //Pitch
-        msg.channels[2] = 1500;                 //Yaw
-        msg.channels[3] = 0;                    //Throttle
+        msg.channels[0] = BASE_ROLL_VALUE - ERROR_X_AXIS * FACTOR;  // Override roll value
+        msg.channels[1] = BASE_PITCH_VALUE - ERROR_Y_AXIS * FACTOR; // Override pitch value
+        msg.channels[2] = BASE_YAW_VALUE;                           // Override yaw value
+        msg.channels[3] = 0;                                        // Override throttle value
         msg.channels[4] = 0;
         msg.channels[5] = 0;
         msg.channels[6] = 0;
         msg.channels[7] = 0;
 
-        pub.publish(msg);
+    */
 
-        cv::imshow("view", InImage);
-        cv::waitKey(30);
-    }
-    catch (cv_bridge::Exception& e)
-    {
-        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-    }
+    // Publish the msg
+    pub.publish(msg);
+
+    // Shows the image on screen
+    cv::imshow("view", InImage);
+    cv::waitKey(30);
+
 }
 
 int main(int argc, char **argv)
