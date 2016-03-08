@@ -5,8 +5,10 @@
 #include <aruco/aruco.h>
 #include <iostream>
 #include <mavros/OverrideRCIn.h>
+#include <math.h>
 
-#define FACTOR 0.6
+//#define FACTOR 1.2
+#define FACTOR 10
 
 image_transport::Subscriber sub;
 ros::Publisher pub;
@@ -56,10 +58,31 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             ErY = ImageY - MarkY;
         }
 
-        msg.channels[0] = 1500 - ErX * FACTOR;  //Roll
-        msg.channels[1] = 1500 - ErY * FACTOR;  //Pitch
-        msg.channels[2] = 1500;                 //Yaw
-        msg.channels[3] = 0;                    //Throttle
+        double Roll = 1500 - log(pow(ErX,2)+1) * FACTOR;
+        double Pitch = 1500 - log(pow(ErY,2)+1) * FACTOR;
+
+        //std::cout << "Roll = " << Roll << " | Pitch = " << Pitch << "\n";
+
+        if (Roll > 1900)
+        {
+            Roll = 1900;
+        } else if (Roll < 1100)
+        {
+            Roll = 1100;
+        }
+
+        if (Pitch > 1900)
+        {
+            Pitch = 1900;
+        } else if (Pitch < 1100)
+        {
+            Pitch = 1100;
+        }
+
+        msg.channels[0] = Roll;     //Roll
+        msg.channels[1] = Pitch;    //Pitch
+        msg.channels[2] = 1500;     //Throttle
+        msg.channels[3] = 0;        //Yaw
         msg.channels[4] = 0;
         msg.channels[5] = 0;
         msg.channels[6] = 0;
