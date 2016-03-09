@@ -37,7 +37,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         double timeBetweenMarkers = (ros::Time::now() - lastTime).toSec();
         lastTime = ros::Time::now();
         
-        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %f | lastMarkerVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, lastTime.toSec(), lastMarkerVelX, lastMarkerVelY, Roll, Pitch);
+        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %fs | lastMarkerVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, timeBetweenMarkers, lastMarkerVelX, lastMarkerVelY, Roll, Pitch);
 
         aruco::MarkerDetector MDetector;
         vector<aruco::Marker> Markers;
@@ -156,6 +156,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "image_listener");
     ros::NodeHandle nh;
+    lastTime = ros::Time::now();
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
     //mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
