@@ -6,17 +6,39 @@
 #include <iostream>
 #include <mavros/OverrideRCIn.h>
 #include <math.h>
+#include <mavros/State.h>
 
 //#define FACTOR 1.2
-#define FACTOR 10
+#define FACTOR 1.2
 
 image_transport::Subscriber sub;
+ros::Subscriber mavros_state_sub;
 ros::Publisher pub;
+ros::Time lastTime;
+std::string mode;
+bool guided;
+bool armed;
+
+//Mark center
+float MarkX, MarkY;
+float lastMarkX, lastMarkY;
+
+//Image center
+float ImageX, ImageY;
+
+double lastMarkerVelX, lastMarkerVelY;
+
+double Roll, Pitch;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     try
     {
+        double timeBetweenMarkers = (ros::Time::now() - lastTime).toSec();
+        lastTime = ros::Time::now();
+        
+        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %f | lastMarkerVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, lastTime.toSec(), lastMarkerVelX, lastMarkerVelY, Roll, Pitch);
+
         aruco::MarkerDetector MDetector;
         vector<aruco::Marker> Markers;
         cv::Point2f MarkCenter;
@@ -24,12 +46,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Get the msg image
         cv::Mat InImage;
         InImage = cv_bridge::toCvShare(msg, "bgr8")->image;
-
-        //Mark center
-        float MarkX, MarkY;
-
-        //Image center
-        float ImageX, ImageY;
 
         // Error between Image and Mark
         float ErX = 0.0;
@@ -45,6 +61,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Create RC msg
         mavros::OverrideRCIn msg;
 
+        lastMarkX = MarkX;
+        lastMarkY = MarkY;
 
         // For each marker, draw info ant its coundaries in the image
         for (unsigned int i = 0; i<Markers.size(); i++){
@@ -58,10 +76,35 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             ErY = ImageY - MarkY;
         }
 
-        double Roll = 1500 - log(pow(ErX,2)+1) * FACTOR;
-        double Pitch = 1500 - log(pow(ErY,2)+1) * FACTOR;
+        if (timeBetweenMarkers < 1.0){
+            lastMarkerVelX = (lastMarkX - MarkX)/timeBetweenMarkers;
+            lastMarkerVelY = (lastMarkY - MarkY)/timeBetweenMarkers;
+        } else{
+            lastMarkerVelX = 0.0;
+            lastMarkerVelY = 0.0;
+        }
 
+        
+        /*if (ErX < 0){
+            Roll = 1500 - log(pow(ErX,2)+1) * FACTOR;
+        }else{
+            Roll = 1500 + log(pow(ErX,2)+1) * FACTOR;
+        }
+
+        if (ErY < 0) {
+            Pitch = 1500 - log(pow(ErY,2)+1) * FACTOR;
+        }else{
+            Pitch = 1500 + log(pow(ErY,2)+1) * FACTOR;
+        }*/
+        
         //std::cout << "Roll = " << Roll << " | Pitch = " << Pitch << "\n";
+
+        //Roll = 1500 - ErX * FACTOR;
+        //Pitch = 1500 - ErY * FACTOR;
+
+        
+        Roll = 1500 - (0.5*ErX+0.1*lastMarkerVelX);
+        Pitch = 1500 - (0.5*ErY+0.1*lastMarkerVelY);  
 
         if (Roll > 1900)
         {
@@ -99,12 +142,23 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
+void mavrosStateCb(const mavros::StateConstPtr &msg)
+{
+    if(msg->mode == std::string("CMODE(0)"))
+        return;
+    ROS_INFO("I heard: [%s] [%d] [%d]", msg->mode.c_str(), msg->armed, msg->guided);
+    mode = msg->mode;
+    guided = msg->guided==128;
+    armed = msg->armed==128;
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "image_listener");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
-    pub = nh.advertise< mavros::OverrideRCIn >("/mavros/rc/override", 10);;
+    //mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
+    pub = nh.advertise<mavros::OverrideRCIn>("/mavros/rc/override", 10);;
     ros::spin();
 }

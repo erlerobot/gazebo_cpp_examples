@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ros_erle_pattern_follower)
 
-set(CMAKE_PREFIX_PATH "/usr/local/lib")
+#set(CMAKE_PREFIX_PATH "/usr/local/lib")
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   mavros
+  mav_msgs
  )
 
 find_package(OpenCV REQUIRED)
@@ -27,6 +28,7 @@ catkin_package(
     image_transport
     cv_bridge
     mavros
+    mav_msgs
 )
 
 
