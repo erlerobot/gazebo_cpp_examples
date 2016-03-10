@@ -7,7 +7,7 @@
 #include <mavros/OverrideRCIn.h>
 #include <mavros/State.h>
 
-#define FACTOR  1.2
+#define FACTOR  0.6
 
 #define MINRC   1100
 #define BASERC  1500
