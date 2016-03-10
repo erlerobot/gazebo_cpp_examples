@@ -10,7 +10,7 @@ cd ..; catkin_make
 source devel/setup.bash
 rosrun ros_erle_pattern_follower ros_erle_pattern_follower
 ```
-
+More instructions [here](http://erlerobotics.com/docs/Simulation/Vehicles/Erle-Copter/Tutorial_5_Pattern_follower.html).
 Simulating this package
 ------------------------
 YouTube video:
