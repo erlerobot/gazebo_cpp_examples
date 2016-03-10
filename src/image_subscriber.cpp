@@ -5,7 +5,6 @@
 #include <aruco/aruco.h>
 #include <iostream>
 #include <mavros/OverrideRCIn.h>
-#include <math.h>
 #include <mavros/State.h>
 
 #define FACTOR  1.2
