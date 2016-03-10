@@ -8,36 +8,48 @@
 #include <math.h>
 #include <mavros/State.h>
 
-//#define FACTOR 1.2
-#define FACTOR 1.2
+//#define FACTOR  1.2
 
+#define MINRC   1100
+#define BASERC  1500
+#define MAXRC   1900
+
+// Subscriber to bottom camera
 image_transport::Subscriber sub;
-ros::Subscriber mavros_state_sub;
-ros::Publisher pub;
-ros::Time lastTime;
-std::string mode;
-bool guided;
-bool armed;
 
-//Mark center
-float MarkX, MarkY;
-float lastMarkX, lastMarkY;
+// Subscriber to flight mode
+// ros::Subscriber mavros_state_sub;
+
+// RC publisher
+ros::Publisher pub;
+
+// Time control
+ros::Time lastTime;
+
+// Mark info
+float MarkX, MarkY; // Mark center
+float lastMarkX, lastMarkY; // Last mark center
+double lastMarkVelX, lastMarkVelY; // Last mark velocity
 
 //Image center
 float ImageX, ImageY;
 
-double lastMarkerVelX, lastMarkerVelY;
-
 double Roll, Pitch;
+
+// Flight mode
+//std::string mode;
+//bool guided;
+//bool armed;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     try
     {
+        // Time since last call
         double timeBetweenMarkers = (ros::Time::now() - lastTime).toSec();
         lastTime = ros::Time::now();
         
-        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %fs | lastMarkerVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, timeBetweenMarkers, lastMarkerVelX, lastMarkerVelY, Roll, Pitch);
+        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %fs | lastMarkVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, timeBetweenMarkers, lastMarkVelX, lastMarkVelY, Roll, Pitch);
 
         aruco::MarkerDetector MDetector;
         vector<aruco::Marker> Markers;
@@ -55,7 +67,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         ImageX = InImage.cols / 2.0f;
         ImageY = InImage.rows / 2.0f;
 
-        // Detect
+        // Detect markers
         MDetector.detect(InImage,Markers);
 
         // Create RC msg
@@ -76,55 +88,40 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             ErY = ImageY - MarkY;
         }
 
+        // Calculate velocity
         if (timeBetweenMarkers < 1.0){
-            lastMarkerVelX = (lastMarkX - MarkX)/timeBetweenMarkers;
-            lastMarkerVelY = (lastMarkY - MarkY)/timeBetweenMarkers;
+            lastMarkVelX = (lastMarkX - MarkX)/timeBetweenMarkers;
+            lastMarkVelY = (lastMarkY - MarkY)/timeBetweenMarkers;
         } else{
-            lastMarkerVelX = 0.0;
-            lastMarkerVelY = 0.0;
+            lastMarkVelX = 0.0;
+            lastMarkVelY = 0.0;
         }
-
-        
-        /*if (ErX < 0){
-            Roll = 1500 - log(pow(ErX,2)+1) * FACTOR;
-        }else{
-            Roll = 1500 + log(pow(ErX,2)+1) * FACTOR;
-        }
-
-        if (ErY < 0) {
-            Pitch = 1500 - log(pow(ErY,2)+1) * FACTOR;
-        }else{
-            Pitch = 1500 + log(pow(ErY,2)+1) * FACTOR;
-        }*/
-        
-        //std::cout << "Roll = " << Roll << " | Pitch = " << Pitch << "\n";
 
         //Roll = 1500 - ErX * FACTOR;
         //Pitch = 1500 - ErY * FACTOR;
 
-        
-        Roll = 1500 - (0.5*ErX+0.1*lastMarkerVelX);
-        Pitch = 1500 - (0.5*ErY+0.1*lastMarkerVelY);  
+        Roll = BASERC - (0.5*ErX+0.1*lastMarkVelX);
+        Pitch = BASERC - (0.5*ErY+0.1*lastMarkVelY);  
 
-        if (Roll > 1900)
+        if (Roll > MAXRC)
         {
-            Roll = 1900;
-        } else if (Roll < 1100)
+            Roll = MAXRC;
+        } else if (Roll < MINRC)
         {
-            Roll = 1100;
+            Roll = MINRC;
         }
 
-        if (Pitch > 1900)
+        if (Pitch > MAXRC)
         {
-            Pitch = 1900;
-        } else if (Pitch < 1100)
+            Pitch = MAXRC;
+        } else if (Pitch < MINRC)
         {
-            Pitch = 1100;
+            Pitch = MINRC;
         }
 
         msg.channels[0] = Roll;     //Roll
         msg.channels[1] = Pitch;    //Pitch
-        msg.channels[2] = 1500;     //Throttle
+        msg.channels[2] = BASERC;   //Throttle
         msg.channels[3] = 0;        //Yaw
         msg.channels[4] = 0;
         msg.channels[5] = 0;
@@ -142,6 +139,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
+/*
 void mavrosStateCb(const mavros::StateConstPtr &msg)
 {
     if(msg->mode == std::string("CMODE(0)"))
@@ -151,6 +149,7 @@ void mavrosStateCb(const mavros::StateConstPtr &msg)
     guided = msg->guided==128;
     armed = msg->armed==128;
 }
+*/
 
 int main(int argc, char **argv)
 {
