@@ -8,7 +8,7 @@
 #include <math.h>
 #include <mavros/State.h>
 
-//#define FACTOR  1.2
+#define FACTOR  1.2
 
 #define MINRC   1100
 #define BASERC  1500
@@ -18,7 +18,7 @@
 image_transport::Subscriber sub;
 
 // Subscriber to flight mode
-// ros::Subscriber mavros_state_sub;
+ros::Subscriber mavros_state_sub;
 
 // RC publisher
 ros::Publisher pub;
@@ -37,9 +37,9 @@ float ImageX, ImageY;
 double Roll, Pitch;
 
 // Flight mode
-//std::string mode;
-//bool guided;
-//bool armed;
+std::string mode;
+bool guided;
+bool armed;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -49,7 +49,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         double timeBetweenMarkers = (ros::Time::now() - lastTime).toSec();
         lastTime = ros::Time::now();
         
-        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %fs | lastMarkVelX = (%f , %f)\n Roll = %f | Pitch = %f\n", MarkX, MarkY, lastMarkX, lastMarkY, timeBetweenMarkers, lastMarkVelX, lastMarkVelY, Roll, Pitch);
+        char tab2[1024];
+        strncpy(tab2, mode.c_str(), sizeof(tab2));
+        tab2[sizeof(tab2) - 1] = 0;
+        ROS_INFO("Marker = (%f , %f) | LastMarker = (%f , %f) \n timeBetweenMarkers = %fs | lastMarkVelX = (%f , %f)\n Roll = %f | Pitch = %f\n Mode = %s \n", MarkX, MarkY, lastMarkX, lastMarkY, timeBetweenMarkers, lastMarkVelX, lastMarkVelY, Roll, Pitch, tab2);
 
         aruco::MarkerDetector MDetector;
         vector<aruco::Marker> Markers;
@@ -97,12 +100,19 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             lastMarkVelY = 0.0;
         }
 
-        //Roll = 1500 - ErX * FACTOR;
-        //Pitch = 1500 - ErY * FACTOR;
-
-        Roll = BASERC - (0.5*ErX+0.1*lastMarkVelX);
-        Pitch = BASERC - (0.5*ErY+0.1*lastMarkVelY);  
-
+        // Calculate Roll and Pitch depending on the mode
+        if (mode == "LOITER"){
+            Roll = BASERC - ErX * FACTOR;
+            Pitch = BASERC - ErY * FACTOR;
+        }else if (mode == "ALT_HOLD"){
+            Roll = BASERC - (0.5*ErX+0.1*lastMarkVelX);
+            Pitch = BASERC - (0.5*ErY+0.1*lastMarkVelY); 
+        }else{
+            Roll = BASERC;
+            Pitch = BASERC;
+        }  
+         
+        // Limit the Roll
         if (Roll > MAXRC)
         {
             Roll = MAXRC;
@@ -111,6 +121,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             Roll = MINRC;
         }
 
+        // Limit the Pitch
         if (Pitch > MAXRC)
         {
             Pitch = MAXRC;
@@ -139,17 +150,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
-/*
+
 void mavrosStateCb(const mavros::StateConstPtr &msg)
 {
     if(msg->mode == std::string("CMODE(0)"))
         return;
-    ROS_INFO("I heard: [%s] [%d] [%d]", msg->mode.c_str(), msg->armed, msg->guided);
+    //ROS_INFO("I heard: [%s] [%d] [%d]", msg->mode.c_str(), msg->armed, msg->guided);
     mode = msg->mode;
     guided = msg->guided==128;
     armed = msg->armed==128;
 }
-*/
+
 
 int main(int argc, char **argv)
 {
@@ -158,7 +169,7 @@ int main(int argc, char **argv)
     lastTime = ros::Time::now();
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
-    //mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
+    mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
     pub = nh.advertise<mavros::OverrideRCIn>("/mavros/rc/override", 10);;
     ros::spin();
 }
