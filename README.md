@@ -5,7 +5,7 @@ Quick setup:
 ```bash
 # Within a catkin directory
 cd src
-git clone https://github.com/IkerZamora/ros_erle_pattern_follower
+git clone https://github.com/erlerobot/ros_erle_pattern_follower
 cd ..; catkin_make
 source devel/setup.bash
 rosrun ros_erle_pattern_follower ros_erle_pattern_follower
