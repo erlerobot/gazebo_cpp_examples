@@ -4,8 +4,8 @@
 #include <cv_bridge/cv_bridge.h>
 #include <aruco/aruco.h>
 #include <iostream>
-#include <mavros/OverrideRCIn.h>
-#include <mavros/State.h>
+#include <mavros_msgs/OverrideRCIn.h>
+#include <mavros_msgs/State.h>
 
 #define FACTOR  0.6
 
@@ -73,7 +73,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         MDetector.detect(InImage,Markers);
 
         // Create RC msg
-        mavros::OverrideRCIn msg;
+        mavros_msgs::OverrideRCIn msg;
 
         lastMarkX = MarkX;
         lastMarkY = MarkY;
@@ -150,7 +150,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 }
 
 
-void mavrosStateCb(const mavros::StateConstPtr &msg)
+void mavrosStateCb(const mavros_msgs::StateConstPtr &msg)
 {
     if(msg->mode == std::string("CMODE(0)"))
         return;
@@ -169,6 +169,6 @@ int main(int argc, char **argv)
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
     mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
-    pub = nh.advertise<mavros::OverrideRCIn>("/mavros/rc/override", 10);;
+    pub = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 10);;
     ros::spin();
 }
