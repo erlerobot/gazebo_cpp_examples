@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>ros_erle_cpp_teleoperation_erle_rover</name>
+  <version>0.0.0</version>
+  <description>The ros_erle_cpp_teleoperation_erle_rover package</description>
+
+  <maintainer email="ahcorde@erlerobot.com">erle</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>roscpp</build_depend>
+  <build_depend>mav_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>mav_msgs</run_depend>
+  </package>
