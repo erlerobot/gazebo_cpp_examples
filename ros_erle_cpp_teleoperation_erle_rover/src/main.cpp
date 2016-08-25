@@ -5,7 +5,7 @@
 
 #include <ros/ros.h>
 
-#include <mavros/OverrideRCIn.h>
+#include <mavros_msgs/OverrideRCIn.h>
 
 class ErleRoverManager
 {
@@ -21,8 +21,8 @@ public:
 private:
   int vx, wz;
 
-  int linear_vel_step, linear_vel_max;
-  int angular_vel_step, angular_vel_max;
+  int linear_vel_step, linear_vel_max, linear_vel_min;
+  int angular_vel_step, angular_vel_max, angular_vel_min;
   std::string name;
 
   void incrementLinearVelocity();
@@ -53,10 +53,12 @@ int ErleRoverManager::getAngularVelocity()
  * @brief Default constructor, needs initialisation.
  */
 ErleRoverManager::ErleRoverManager() :
-                         linear_vel_step(10),
-                         linear_vel_max(1700),
-                         angular_vel_step(50),
+                         linear_vel_step(2),
+                         linear_vel_max(1560),
+                         linear_vel_min(1440),
+                         angular_vel_step(100),
                          angular_vel_max(1900),
+                         angular_vel_min(1100),
                          quit_requested(false),
                          key_file_descriptor(0),
                          vx(0.0), wz(0.0)
@@ -75,9 +77,9 @@ ErleRoverManager::~ErleRoverManager()
 bool ErleRoverManager::init()
 {
   std::cout << "ErleRoverManager : using linear  vel step [" << linear_vel_step << "]." << std::endl;
-  std::cout << "ErleRoverManager : using linear  vel max  [" << linear_vel_max << "]." << std::endl;
+  std::cout << "ErleRoverManager : using linear  vel max  [" << linear_vel_max << ", " << linear_vel_min << "]." << std::endl;
   std::cout << "ErleRoverManager : using angular vel step [" << angular_vel_step << "]." << std::endl;
-  std::cout << "ErleRoverManager : using angular vel max  [" << angular_vel_max << "]." << std::endl;
+  std::cout << "ErleRoverManager : using angular vel max  [" << angular_vel_max << ", " << angular_vel_min << "]." << std::endl;
 
   vx = 1500;
   wz = 1500;
@@ -192,7 +194,7 @@ void ErleRoverManager::incrementLinearVelocity()
  */
 void ErleRoverManager::decrementLinearVelocity()
 {
-  if (vx >= -linear_vel_max){
+  if (vx >= linear_vel_min){
     vx -= linear_vel_step;
   }
 }
@@ -212,7 +214,7 @@ void ErleRoverManager::incrementAngularVelocity()
  */
 void ErleRoverManager::decrementAngularVelocity()
 {
-  if (wz >= -angular_vel_max){
+  if (wz >= angular_vel_min){
     wz -= angular_vel_step;
   }
 }
@@ -230,35 +232,35 @@ void signalHandler(int signum) {
 
 int main(int argc, char** argv)
 {
-  	signal(SIGINT, signalHandler);
+  signal(SIGINT, signalHandler);
 
-    ros::init(argc, argv, "mavros_rc_override");
-    ros::NodeHandle n;
+  ros::init(argc, argv, "mavros_msgs_rc_override");
+  ros::NodeHandle n;
 
-  	ErleRoverManager erlerover_manager;
-  	erlerover_manager.init();
+  ErleRoverManager erlerover_manager;
+  erlerover_manager.init();
 
-	int rate = 100;
-	ros::Rate r(rate);
+  int rate = 20;
+  ros::Rate r(rate);
 
-    ros::Publisher rc_override_pub = n.advertise<mavros::OverrideRCIn>("/mavros/rc/override", 10);
-    mavros::OverrideRCIn msg_override;
+  ros::Publisher rc_override_pub = n.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 1);
+  mavros_msgs::OverrideRCIn msg_override;
 
-	while (n.ok()){
+  while (n.ok()){
 
         msg_override.channels[0] = erlerover_manager.getAngularVelocity();
-        msg_override.channels[1] = 1100;
+        msg_override.channels[1] = 0;
         msg_override.channels[2] = erlerover_manager.getLinearVelocity();
-        msg_override.channels[3] = 1100;
-        msg_override.channels[4] = 1100;
-        msg_override.channels[5] = 1100;
-        msg_override.channels[6] = 1100;
-        msg_override.channels[7] = 1100;
+        msg_override.channels[3] = 0;
+        msg_override.channels[4] = 0;
+        msg_override.channels[5] = 0;
+        msg_override.channels[6] = 0;
+        msg_override.channels[7] = 0;
 
         rc_override_pub.publish(msg_override);
-        ros::spinOnce();
+//        ros::spinOnce();
         r.sleep();
-	}
+  }
 
   return 0;
 }
