@@ -1,0 +1,22 @@
+<package>
+  <name>ros_erle_rover_tf</name>
+  <version>0.0.1</version>
+  <description>
+    Erle-Rover transformations
+  </description>
+  <author email="ahcorde@erlerobot.com">Alejandro Hernandez</author>
+  <maintainer email="ahcorde@erlerobot.com">Alejandro Hernandez</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Ros -->
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>tf</build_depend>
+
+  <!-- Ros -->
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>tf</run_depend>
+</package>
+
