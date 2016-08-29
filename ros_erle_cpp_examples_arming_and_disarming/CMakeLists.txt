@@ -4,7 +4,7 @@ project(ros_erle_cpp_examples_arming_and_disarming)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  mav_msgs
+  mavros_msgs
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -17,7 +17,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 catkin_package(
   CATKIN_DEPENDS
     roscpp
-    mav_msgs
+    mavros_msgs
 )
 
 

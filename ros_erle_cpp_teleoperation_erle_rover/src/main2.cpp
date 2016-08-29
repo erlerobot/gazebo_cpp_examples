@@ -7,6 +7,8 @@
 
 #include <mavros_msgs/OverrideRCIn.h>
 
+#include <geometry_msgs/Twist.h>
+
 class ErleRoverManager
 {
 public:
@@ -21,8 +23,8 @@ public:
 private:
   int vx, wz;
 
-  int linear_vel_step, linear_vel_max, linear_vel_min;
-  int angular_vel_step, angular_vel_max, angular_vel_min;
+  int linear_vel_step, linear_vel_max;
+  int angular_vel_step, angular_vel_max;
   std::string name;
 
   void incrementLinearVelocity();
@@ -37,6 +39,7 @@ private:
   bool quit_requested;
   int key_file_descriptor;
   struct termios original_terminal_state;
+
 };
 
 int ErleRoverManager::getLinearVelocity()
@@ -54,11 +57,9 @@ int ErleRoverManager::getAngularVelocity()
  */
 ErleRoverManager::ErleRoverManager() :
                          linear_vel_step(2),
-                         linear_vel_max(1560),
-                         linear_vel_min(1440),
+                         linear_vel_max(1700),
                          angular_vel_step(100),
                          angular_vel_max(1900),
-                         angular_vel_min(1100),
                          quit_requested(false),
                          key_file_descriptor(0),
                          vx(0.0), wz(0.0)
@@ -76,10 +77,12 @@ ErleRoverManager::~ErleRoverManager()
  */
 bool ErleRoverManager::init()
 {
+    std::cout << "Automatic!!" << std::endl;
+
   std::cout << "ErleRoverManager : using linear  vel step [" << linear_vel_step << "]." << std::endl;
-  std::cout << "ErleRoverManager : using linear  vel max  [" << linear_vel_max << ", " << linear_vel_min << "]." << std::endl;
+  std::cout << "ErleRoverManager : using linear  vel max  [" << linear_vel_max << "]." << std::endl;
   std::cout << "ErleRoverManager : using angular vel step [" << angular_vel_step << "]." << std::endl;
-  std::cout << "ErleRoverManager : using angular vel max  [" << angular_vel_max << ", " << angular_vel_min << "]." << std::endl;
+  std::cout << "ErleRoverManager : using angular vel max  [" << angular_vel_max << "]." << std::endl;
 
   vx = 1500;
   wz = 1500;
@@ -194,7 +197,7 @@ void ErleRoverManager::incrementLinearVelocity()
  */
 void ErleRoverManager::decrementLinearVelocity()
 {
-  if (vx >= linear_vel_min){
+  if (vx >= -linear_vel_max){
     vx -= linear_vel_step;
   }
 }
@@ -214,7 +217,7 @@ void ErleRoverManager::incrementAngularVelocity()
  */
 void ErleRoverManager::decrementAngularVelocity()
 {
-  if (wz >= angular_vel_min){
+  if (wz >= -angular_vel_max){
     wz -= angular_vel_step;
   }
 }
@@ -230,27 +233,53 @@ void signalHandler(int signum) {
   shutdown_req = true;
 }
 
+ros::Publisher pub_cmd_vel;
+
+int sterring = 0;
+
+void cmd_vel_Callback(const geometry_msgs::Twist::ConstPtr& msg)
+{
+  double sterring_percentage = 0;
+  if(msg->angular.z!=0.0){
+    sterring = msg->angular.z;
+    sterring_percentage = msg->angular.z;
+    sterring_percentage = msg->angular.z*5;
+
+    sterring = -400 * sterring_percentage + 1500; 
+  }else{
+    sterring = 1500;
+  }
+
+  printf("->%.2f  %.2f %d\n",msg->angular.z, sterring_percentage, sterring);
+}
+
 int main(int argc, char** argv)
 {
   signal(SIGINT, signalHandler);
 
-  ros::init(argc, argv, "mavros_msgs_rc_override");
+  ros::init(argc, argv, "mavros_rc_override");
   ros::NodeHandle n;
 
   ErleRoverManager erlerover_manager;
   erlerover_manager.init();
 
-  int rate = 20;
+  int rate = 50;
   ros::Rate r(rate);
 
   ros::Publisher rc_override_pub = n.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 1);
   mavros_msgs::OverrideRCIn msg_override;
 
+  ros::Subscriber sub2 = n.subscribe("/navigation_velocity_smoother/raw_cmd_vel", 1, cmd_vel_Callback);
+
+
   while (n.ok()){
 
-        msg_override.channels[0] = erlerover_manager.getAngularVelocity();
+        msg_override.channels[0] = sterring;//erlerover_manager.getAngularVelocity();
         msg_override.channels[1] = 0;
-        msg_override.channels[2] = erlerover_manager.getLinearVelocity();
+        //if(linear_speed)
+          msg_override.channels[2] = erlerover_manager.getLinearVelocity();
+      //else
+      //  msg_override.channels[2] = 1500;
         msg_override.channels[3] = 0;
         msg_override.channels[4] = 0;
         msg_override.channels[5] = 0;
@@ -258,7 +287,7 @@ int main(int argc, char** argv)
         msg_override.channels[7] = 0;
 
         rc_override_pub.publish(msg_override);
-//        ros::spinOnce();
+        ros::spinOnce();
         r.sleep();
   }
 

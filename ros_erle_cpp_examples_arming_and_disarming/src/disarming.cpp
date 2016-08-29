@@ -1,7 +1,7 @@
 #include <cstdlib>
 
 #include <ros/ros.h>
-#include <mavros/CommandBool.h>
+#include <mavros_msgs/CommandBool.h>
 
 int main(int argc, char **argv)
 {
@@ -14,8 +14,8 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////
     //////////////////DISARM////////////////////
     ////////////////////////////////////////////
-    ros::ServiceClient disarming_cl = n.serviceClient<mavros::CommandBool>("/mavros/cmd/arming");
-    mavros::CommandBool srv;
+    ros::ServiceClient disarming_cl = n.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+    mavros_msgs::CommandBool srv;
     srv.request.value = false;
     if(disarming_cl.call(srv)){
         ROS_ERROR("ARM send ok %d", srv.response.success);

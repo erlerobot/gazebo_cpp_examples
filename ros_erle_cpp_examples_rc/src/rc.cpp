@@ -2,7 +2,7 @@
 #include <stdlib.h>     /* atoi */
 
 #include <ros/ros.h>
-#include <mavros/OverrideRCIn.h>
+#include <mavros_msgs/OverrideRCIn.h>
 
 int main(int argc, char **argv)
 {
@@ -22,9 +22,9 @@ int main(int argc, char **argv)
     int rate = 100;
     ros::Rate r(rate);
 
-    ros::Publisher rc_override_pub = n.advertise<mavros::OverrideRCIn>("/mavros/rc/override", 10);
+    ros::Publisher rc_override_pub = n.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 10);
     
-    mavros::OverrideRCIn msg_override;
+    mavros_msgs::OverrideRCIn msg_override;
 
     while (n.ok()){
    

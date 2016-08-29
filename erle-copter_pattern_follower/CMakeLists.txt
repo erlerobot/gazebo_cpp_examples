@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   image_transport
   cv_bridge
-  mav_msgs
+  mavros_msgs
  )
 
 find_package(OpenCV REQUIRED)
@@ -26,7 +26,7 @@ catkin_package(
     roscpp
     image_transport
     cv_bridge
-    mav_msgs
+    mavros_msgs
 )
 
 

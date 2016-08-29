@@ -4,7 +4,7 @@ project(ros_erle_cpp_teleoperation_erle_rover)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  mav_msgs
+  mavros_msgs
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -17,7 +17,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 catkin_package(
   CATKIN_DEPENDS
     roscpp
-    mav_msgs
+    mavros_msgs
 )
 
 ###########
@@ -27,10 +27,16 @@ catkin_package(
 add_executable(teleoperation
   src/main.cpp
 )
-
 target_link_libraries(teleoperation ${catkin_LIBRARIES})
 add_dependencies(teleoperation teleoperation)
 
-install(TARGETS teleoperation 
+add_executable(teleoperation_automatic
+  src/main2.cpp
+)
+target_link_libraries(teleoperation_automatic ${catkin_LIBRARIES})
+add_dependencies(teleoperation_automatic teleoperation_automatic)
+
+
+install(TARGETS teleoperation teleoperation_automatic
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
