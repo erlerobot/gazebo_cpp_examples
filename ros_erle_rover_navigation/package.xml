@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>ros_erle_rover_navigation</name>
+  <version>0.0.1</version>
+  <description>Launchers for Erle-Rover</description>
+  <maintainer email="ahcorde@erlerobot.com">Alejandro Hernandez</maintainer>
+  <license>BSD</license>
+  <url type="website">http://erlerobot.com</url>
+  <url type="repository">https://github.com/erlerbot/ros_gazebo_cpp</url>
+  <url type="bugtracker">https://github.com/erlerbot/ros_gazebo_cpp/issues</url>
+  <author email="ahcorde@erlerobot.com">Alejandro Hernández</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>rviz</run_depend>
+</package>
