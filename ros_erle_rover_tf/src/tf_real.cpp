@@ -105,10 +105,19 @@ int main(int argc, char* argv[])
     qy = 0.0;
     qz = 0.0;
     qw = 1.0;
+
+    x_amcl = 0.0;
+    y_amcl = 0.0;
+    z_amcl = 0.0;
+    qx_amcl =0.0;
+    qy_amcl = 0.0;
+    qz_amcl = 0.0;
+    qw_amcl = 1.0;
+
     ros::init(argc, argv, "kobuki_transforms");
     ros::NodeHandle n;
 
-    int32_t publish_rate_ = 50;
+    int32_t publish_rate_ = 400;
     tf::TransformBroadcaster tf_br_;
     tf::StampedTransform tf_map_to_odom_;
     tf::StampedTransform tf_map_to_odomacml_;
