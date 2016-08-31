@@ -15,15 +15,15 @@
     <rosparam file="$(arg custom_param_file)" command="load" />
 
 
-    <rosparam file="param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
 
-    <rosparam file="param/local_costmap_params.yaml" command="load" />
-    <rosparam file="param/global_costmap_params.yaml" command="load" />
-    <rosparam file="param/dwa_local_planner_params.yaml" command="load" />
-    <rosparam file="param/move_base_params.yaml" command="load" />
-    <rosparam file="param/global_planner_params.yaml" command="load" />
-    <rosparam file="param/navfn_global_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/global_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/navfn_global_planner_params.yaml" command="load" />
 
     <param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>
     <param name="global_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
