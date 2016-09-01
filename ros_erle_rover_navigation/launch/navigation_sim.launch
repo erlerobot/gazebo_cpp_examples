@@ -44,46 +44,38 @@
 	<arg name="laser_topic" default="scan" />
 	<arg name="custom_param_file" default="$(find ros_erle_rover_navigation)param/dummy.yaml"/>
 
-	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
 
-		<rosparam file="$(arg custom_param_file)" command="load" />
+    <rosparam file="$(arg custom_param_file)" command="load" />
 
-		<rosparam file="param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-		<rosparam file="param/costmap_common_params.yaml" command="load" ns="global_costmap" />
 
-		<rosparam file="param/local_costmap_params.yaml" command="load" />
-		<rosparam file="param/global_costmap_params.yaml" command="load" />
-		<rosparam file="param/dwa_local_planner_params.yaml" command="load" />
-		<rosparam file="param/move_base_params.yaml" command="load" />
-		<rosparam file="param/global_planner_params.yaml" command="load" />
-		<rosparam file="param/navfn_global_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
 
-		<param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>
-		<param name="global_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
-		<param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
-		<param name="local_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
-		<param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
+    <rosparam file="$(find ros_erle_rover_navigation)/param/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/global_planner_params.yaml" command="load" />
+    <rosparam file="$(find ros_erle_rover_navigation)/param/navfn_global_planner_params.yaml" command="load" />
 
-		<remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
-		<remap from="odom" to="$(arg odom_topic)"/>
-		<remap from="scan" to="$(arg laser_topic)"/>
-	</node>
+    <param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>
+    <param name="global_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
+    <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
+    <param name="local_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
+    <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
 
-	<node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">
-		<param name="base_frame"    value="base_footprint"/>
-		<param name="_fixed_frame"  value="map"/>
-		<param name="use_imu"       value="false"/>
-		<param name="use_odom"      value="false"/>
-		<param name="use_vel"       value="false"/>
-		<param name="max_iterations" value="10"/>
-		<param name="publish_tf"	value="false"/>
-		<param name="publish_pose"	value="true"/>
-	</node>
 
-	<node pkg="ros_erle_rover_tf" type="tf_real" name="tf_real" output="screen">
-	</node>
+    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+    <remap from="scan" to="$(arg laser_topic)"/>
+  </node>
+
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ros_erle_rover_navigation)/rviz/navigation.rviz"/>
+
+	<node pkg="ros_erle_rover_tf" type="tf_sim" name="tf_sim" output="screen">
+	</node>
 
 	<!-- Map server -->
 	<arg name="map_file" default="map.yaml"/>
