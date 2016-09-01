@@ -218,11 +218,11 @@ int main(int argc, char* argv[])
         tf_base_to_chassis_.setRotation(tf::Quaternion(0.0f, 0.0f, 0.0f, 1.0f));
         tf_br_.sendTransform(tf_base_to_chassis_);
 
-        tf_sonar_to_laser_.setOrigin(tf::Vector3(0.0f, 0.0f, 0.0f));
+        tf_sonar_to_laser_.setOrigin(tf::Vector3(0.0f, 0.0f, 0.2f));
         tf_sonar_to_laser_.setRotation(tf::Quaternion(0.0f, 0.0f, 0.0f, 1.0f));
         tf_br_.sendTransform(tf_sonar_to_laser_);
 
-        tf_chassis_to_sonar_.setOrigin(tf::Vector3(0.0f, 0.0f, 0.0f));
+        tf_chassis_to_sonar_.setOrigin(tf::Vector3(0.0f, 0.0f, 0.2f));
         tf_chassis_to_sonar_.setRotation(tf::Quaternion(0.0f, 0.0f, 0.0f, 1.0f));
         tf_br_.sendTransform(tf_chassis_to_sonar_);
 
