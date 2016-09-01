@@ -24,7 +24,7 @@ private:
   int vx, wz;
 
   int linear_vel_step, linear_vel_max;
-  int angular_vel_step, angular_vel_max;
+  int angular_vel_step, angular_vel_max, angular_vel_min;
   std::string name;
 
   void incrementLinearVelocity();
@@ -57,9 +57,10 @@ int ErleRoverManager::getAngularVelocity()
  */
 ErleRoverManager::ErleRoverManager() :
                          linear_vel_step(2),
-                         linear_vel_max(1700),
+                         linear_vel_max(1900),
                          angular_vel_step(100),
                          angular_vel_max(1900),
+                         angular_vel_min(1100),
                          quit_requested(false),
                          key_file_descriptor(0),
                          vx(0.0), wz(0.0)
@@ -84,7 +85,7 @@ bool ErleRoverManager::init()
   std::cout << "ErleRoverManager : using angular vel step [" << angular_vel_step << "]." << std::endl;
   std::cout << "ErleRoverManager : using angular vel max  [" << angular_vel_max << "]." << std::endl;
 
-  vx = 1500;
+  vx = 1538;
   wz = 1500;
 
   boost::thread t(boost::bind(&ErleRoverManager::keyboardInputLoop, this));
@@ -217,14 +218,14 @@ void ErleRoverManager::incrementAngularVelocity()
  */
 void ErleRoverManager::decrementAngularVelocity()
 {
-  if (wz >= -angular_vel_max){
+  if (wz >= angular_vel_min){
     wz -= angular_vel_step;
   }
 }
 
 void ErleRoverManager::resetVelocity()
 {
-  vx = 1500;
+  vx = 1538;
   wz = 1500;
 }
 
@@ -242,13 +243,19 @@ void cmd_vel_Callback(const geometry_msgs::Twist::ConstPtr& msg)
   double sterring_percentage = 0;
   if(msg->angular.z!=0.0){
     sterring = msg->angular.z;
-    sterring_percentage = msg->angular.z;
-    sterring_percentage = msg->angular.z*5;
-
+    sterring_percentage = msg->angular.z/0.2;
+ 
     sterring = -400 * sterring_percentage + 1500; 
   }else{
     sterring = 1500;
   }
+
+  if(sterring>1900)
+    sterring = 1900;
+
+  if(sterring<1100)
+    sterring = 1100;
+
 
   printf("->%.2f  %.2f %d\n",msg->angular.z, sterring_percentage, sterring);
 }
@@ -263,23 +270,22 @@ int main(int argc, char** argv)
   ErleRoverManager erlerover_manager;
   erlerover_manager.init();
 
-  int rate = 50;
+  int rate = 100;
   ros::Rate r(rate);
 
   ros::Publisher rc_override_pub = n.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 1);
   mavros_msgs::OverrideRCIn msg_override;
 
-  ros::Subscriber sub2 = n.subscribe("/navigation_velocity_smoother/raw_cmd_vel", 1, cmd_vel_Callback);
+  ros::Subscriber sub2 = n.subscribe("/navigation_velocity_smoother/raw_cmd_vel", 1000, cmd_vel_Callback);
 
-
+  // ROS 1 asynchronous spinner
+  ros::AsyncSpinner async_spinner(100);
+  async_spinner.start();
   while (n.ok()){
 
-        msg_override.channels[0] = sterring;//erlerover_manager.getAngularVelocity();
+        msg_override.channels[0] = sterring;
         msg_override.channels[1] = 0;
-        //if(linear_speed)
-          msg_override.channels[2] = erlerover_manager.getLinearVelocity();
-      //else
-      //  msg_override.channels[2] = 1500;
+        msg_override.channels[2] = erlerover_manager.getLinearVelocity();
         msg_override.channels[3] = 0;
         msg_override.channels[4] = 0;
         msg_override.channels[5] = 0;
@@ -287,7 +293,6 @@ int main(int argc, char** argv)
         msg_override.channels[7] = 0;
 
         rc_override_pub.publish(msg_override);
-        ros::spinOnce();
         r.sleep();
   }
 
