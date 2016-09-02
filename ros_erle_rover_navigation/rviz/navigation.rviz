@@ -5,22 +5,18 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /RobotModel1
-        - /RobotModel1/Status1
         - /TF1/Frames1
-        - /TF1/Frames1/base_link1
-        - /TF1/Frames1/chassis1
         - /TF1/Frames1/laser1
-        - /TF1/Frames1/sonar2_link1
         - /TF1/Tree1
         - /LaserScan1
         - /LaserScan1/Status1
         - /Global Map1/Planner1
-        - /Local Map1
         - /Local Map1/Planner1
         - /Local Map1/Trajectory Cloud1
+        - /Odometry1
+        - /Odometry1/Status1
         - /Odometry2
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.549419
     Tree Height: 1335
   - Class: rviz/Selection
     Name: Selection
@@ -82,29 +78,33 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         base_footprint:
-          Value: true
-        base_footprint_amcl:
-          Value: true
+          Value: false
         base_link:
-          Value: true
+          Value: false
+        camera_link:
+          Value: false
         chassis:
-          Value: true
+          Value: false
         fcu_utm:
-          Value: true
+          Value: false
+        imu_link:
+          Value: false
         laser:
-          Value: true
+          Value: false
         local_origin:
-          Value: true
+          Value: false
         map:
-          Value: true
+          Value: false
         odom:
-          Value: true
-        odom_amcl:
-          Value: true
+          Value: false
+        scanmatcher_frame:
+          Value: false
         sonar2_link:
-          Value: true
+          Value: false
+        world:
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -115,13 +115,14 @@ Visualization Manager:
           odom:
             base_footprint:
               base_link:
+                camera_link:
+                  {}
                 chassis:
                   sonar2_link:
                     laser:
                       {}
-          odom_amcl:
-            base_footprint_amcl:
-              {}
+                imu_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -139,9 +140,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 2806
+      Max Intensity: 3347
       Min Color: 0; 0; 0
-      Min Intensity: 305
+      Min Intensity: 173
       Name: LaserScan
       Position Transformer: XYZ
       Queue Size: 10
@@ -232,7 +233,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 412.4
+          Max Intensity: 389.2
           Min Color: 0; 0; 0
           Min Intensity: 0
           Name: Cost Cloud
@@ -262,9 +263,9 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 75.8
+          Max Intensity: 74.925
           Min Color: 0; 0; 0
-          Min Intensity: 72.4
+          Min Intensity: 72.725
           Name: Trajectory Cloud
           Position Transformer: XYZ
           Queue Size: 10
@@ -342,7 +343,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: map
-    Frame Rate: 1
+    Frame Rate: 20
   Name: root
   Tools:
     - Class: rviz/MoveCamera
@@ -360,7 +361,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.79003
+      Angle: -7.79503
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
@@ -369,7 +370,7 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: -84.9329
+      Scale: -74.9565
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: -0.47484
@@ -391,5 +392,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1247
-  X: 55
+  X: 1302
   Y: 14

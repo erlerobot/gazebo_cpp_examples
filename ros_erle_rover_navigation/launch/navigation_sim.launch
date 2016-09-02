@@ -1,78 +1,8 @@
 <launch>
-	<node pkg="amcl" type="amcl" name="amcl" output="screen">
-	  <!-- Publish scans from best pose at a max of 10 Hz -->
-	  <param name="odom_model_type" value="diff"/>
-	  <param name="odom_alpha5" value="0.1"/>
-	  <param name="transform_tolerance" value="0.2" />
-	  <param name="gui_publish_rate" value="10.0"/>
-	  <param name="laser_max_beams" value="30"/>
-	  <param name="min_particles" value="500"/>
-	  <param name="max_particles" value="5000"/>
-	  <param name="kld_err" value="0.05"/>
-	  <param name="kld_z" value="0.99"/>
-	  <param name="odom_alpha1" value="0.2"/>
-	  <param name="odom_alpha2" value="0.2"/>
-	  <!-- translation std dev, m -->
-	  <param name="odom_alpha3" value="0.8"/>
-	  <param name="odom_alpha4" value="0.2"/>
-	  <param name="laser_z_hit" value="0.5"/>
-	  <param name="laser_z_short" value="0.05"/>
-	  <param name="laser_z_max" value="0.05"/>
-	  <param name="laser_z_rand" value="0.5"/>
-	  <param name="laser_sigma_hit" value="0.2"/>
-	  <param name="laser_lambda_short" value="0.1"/>
-	  <param name="laser_lambda_short" value="0.1"/>
-	<!--  <param name="laser_model_type" value="likelihood_field_prob"/>-->
-	  <param name="laser_model_type" value="likelihood_field"/>
-	  <param name="laser_likelihood_max_dist" value="2.0"/>
-	  <param name="update_min_d" value="0.2"/>
-	  <param name="update_min_a" value="0.2"/>
-	  <param name="odom_frame_id" value="odom"/>
-	  <param name="resample_interval" value="1"/>
-	  <param name="transform_tolerance" value="0.1"/>
-	  <param name="recovery_alpha_slow" value="0.0"/>
-	  <param name="recovery_alpha_fast" value="0.0"/>
-	  <param name="initial_pose_x" value="0"/>
-	  <param name="initial_pose_y" value="0"/>
-	  <param name="initial_pose_a" value="0"/>
-	</node>
+	<include file="$(find ros_erle_rover_navigation)/launch/localizacion.launch"/>
+	<include file="$(find ros_erle_rover_navigation)/launch/move_base.launch"/>
 
-	<arg name="odom_frame_id"   default="odom_amcl"/>
-	<arg name="base_frame_id"   default="base_footprint_amcl"/>
-	<arg name="global_frame_id" default="map"/>
-	<arg name="odom_topic" default="odom_amcl" />
-	<arg name="laser_topic" default="scan" />
-	<arg name="custom_param_file" default="$(find ros_erle_rover_navigation)param/dummy.yaml"/>
-
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-
-    <rosparam file="$(arg custom_param_file)" command="load" />
-
-
-    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
-
-    <rosparam file="$(find ros_erle_rover_navigation)/param/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/dwa_local_planner_params.yaml" command="load" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/move_base_params.yaml" command="load" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/global_planner_params.yaml" command="load" />
-    <rosparam file="$(find ros_erle_rover_navigation)/param/navfn_global_planner_params.yaml" command="load" />
-
-    <param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>
-    <param name="global_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
-    <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>
-    <param name="local_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
-    <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
-
-
-    <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>
-    <remap from="odom" to="$(arg odom_topic)"/>
-    <remap from="scan" to="$(arg laser_topic)"/>
-  </node>
-
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ros_erle_rover_navigation)/rviz/navigation.rviz"/>
+	<include file="$(find ros_erle_rover_navigation)/launch/view_navigation2.launch"/>
 
 	<node pkg="ros_erle_rover_tf" type="tf_sim" name="tf_sim" output="screen">
 	</node>
