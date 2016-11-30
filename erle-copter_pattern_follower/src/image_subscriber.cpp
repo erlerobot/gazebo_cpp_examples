@@ -169,6 +169,6 @@ int main(int argc, char **argv)
     image_transport::ImageTransport it(nh);
     sub = it.subscribe("/erlecopter/bottom/image_raw", 1, imageCallback);
     mavros_state_sub = nh.subscribe("/mavros/state", 1, mavrosStateCb);
-    pub = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 10);;
+    pub = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 10);
     ros::spin();
 }
